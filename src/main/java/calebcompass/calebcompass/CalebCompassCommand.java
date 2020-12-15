@@ -354,6 +354,31 @@ public class CalebCompassCommand implements CommandExecutor {
 			return true;
 		}
 
+
+		// focus point namepoint
+		if (args.length == 2 && args[0].equalsIgnoreCase("focus") && sender instanceof Player) {
+
+			SavePointConfig.getInstance().load();
+			if (!CompassInstance.hasPerm((Player) sender, "point.focus")) {
+				sender.sendMessage(PREFIX + "You do not have permission for this command!");
+				return true;
+			}
+			Player player = (Player) sender;
+
+			SavePoint point = getSavePointFromName(player, args[1]);
+			if (point == null) {
+				player.sendMessage(PREFIX + "No point found with this name!");
+				return true;
+			}
+
+			CompassInstance.getInstance().getCompassLocation(player).setTarget(point.getLoc1());
+			CompassInstance.getInstance().getCompassLocation(player).setOrigin(player.getLocation());
+			CompassInstance.getInstance().getCompassLocation(player).setTracking(true);
+			sender.sendMessage(PREFIX + "Changed focus");
+			CompassInstance.getInstance().saveData();
+			return true;
+		}
+
 		//list waypoints
 		if (args.length>=1 && args[0].equalsIgnoreCase("waypoints") && sender instanceof Player) {
 			if (!CompassInstance.hasPerm((Player) sender, "point.list")) {
@@ -418,6 +443,15 @@ public class CalebCompassCommand implements CommandExecutor {
 			if (goDir2 == yaw) {
 				return cur;
 			}
+		}
+		return null;
+	}
+
+
+	public SavePoint getSavePointFromName(Player player, String name) {
+		ArrayList<SavePoint> extraPoints = CompassInstance.getInstance().getCompassLocation(player).getActivePoints();
+		for (SavePoint cur : extraPoints) {
+			if (cur.getName().equalsIgnoreCase(name)) return cur;
 		}
 		return null;
 	}
